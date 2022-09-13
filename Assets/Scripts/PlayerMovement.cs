@@ -9,12 +9,14 @@ public class PlayerMovement : MonoBehaviour
     private SpriteRenderer sprite;
     private Animator anim;
     private float dirX = 0f;
-    // [SerializeField] private LayerMask jumpableGround;
+    [SerializeField] private LayerMask jumpableGround;
     [SerializeField] private float moveSpeed = 7f;
     [SerializeField] private float jumpSpeed = 14f;
 
     private enum MovementState { idle, running, jumping, falling };
     MovementState state;
+
+    private int jumpNumber;
 
     // Start is called before the first frame update
     private void Start()
@@ -23,6 +25,8 @@ public class PlayerMovement : MonoBehaviour
         coll = GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
         sprite = GetComponent<SpriteRenderer>();
+
+        jumpNumber = 0;
     }
 
     // Update is called once per frame
@@ -31,9 +35,15 @@ public class PlayerMovement : MonoBehaviour
         dirX = Input.GetAxisRaw("Horizontal");
         rb.velocity = new Vector2(dirX * moveSpeed, rb.velocity.y);
 
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown("Jump") && jumpNumber < 2)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
+            jumpNumber += 1;
+        }
+
+        if (isGrounded())
+        {
+            jumpNumber = 0;
         }
 
         if (dirX != 0f)
@@ -66,8 +76,8 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
-    // bool IsGrounded()
-    // {
-    //     return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0f, Vector2.down, .1f, jumpableGround);
-    // }
+    bool isGrounded()
+    {
+        return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0f, Vector2.down, .1f, jumpableGround);
+    }
 }
